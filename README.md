@@ -1,73 +1,65 @@
-# Analisis Pertumbuhan Fisik Bayi
+# GrowTrack
 
-Aplikasi Android untuk menganalisis pertumbuhan fisik bayi berdasarkan foto yang diunggah.
+GrowTrack adalah aplikasi Android yang dirancang untuk membantu orang tua dalam memantau kondisi gizi, kesehatan, dan risiko stunting pada balita dengan cara yang lebih akurat, terstruktur, dan mudah dipahami.
 
 ## Fitur Utama
 
-### 1. Upload Gambar
-- Ambil foto dari kamera
-- Pilih foto dari galeri
-- Preview gambar sebelum analisis
+1. **Analisis Pertumbuhan Fisik Bayi**  
+   Memungkinkan orang tua untuk memantau pertumbuhan fisik bayi dengan mengunggah foto. Aplikasi menggunakan teknologi *computer vision* untuk mengukur tinggi badan, lingkar kepala, dan lingkar lengan bayi.
 
-### 2. Proses Analisis
-- Progress bar untuk menampilkan status analisis
-- Estimasi waktu pemrosesan
-- Indikator visual yang informatif
+2. **Analisis Rencana Gizi & Pola Makan Balita**  
+   Menghitung total nutrisi harian dari makanan yang dikonsumsi balita, dengan rincian kalori, protein, lemak, dan karbohidrat. Riwayat konsumsi ditampilkan dalam bentuk grafik untuk pemantauan jangka panjang.
 
-### 3. Hasil Pengukuran
-- Menampilkan tinggi badan (cm)
-- Menampilkan lingkar kepala (cm)
-- Menampilkan berat badan (kg)
-- Status pertumbuhan (Normal/Berisiko Stunting/Stunting)
+3. **Health Risk Checker**  
+   Memeriksa kondisi kesehatan harian balita berdasarkan parameter seperti suhu tubuh, frekuensi muntah, nafsu makan, dan kondisi BAB. Hasil pemeriksaan memberikan kategori risiko (Rendah, Sedang, Tinggi) serta rekomendasi tindakan.
 
-### 4. Riwayat Pengukuran
-- Menyimpan hasil pengukuran
-- Melihat riwayat dengan thumbnail
-- Detail setiap pengukuran
+4. **Analisis Risiko Stunting Balita**  
+   Menghitung nilai z-score berdasarkan usia, berat badan, tinggi badan, dan jenis kelamin untuk menilai risiko stunting pada balita, serta memberikan rekomendasi berdasarkan hasil analisis.
 
-### 5. Rekomendasi
-- Rekomendasi medis
-- Rekomendasi gizi
-- Aktivitas pendukung
+## Cara Kerja Aplikasi
+
+1. **Analisis Pertumbuhan Fisik**  
+   Unggah foto bayi untuk mengukur tinggi badan, lingkar kepala, dan lingkar lengan menggunakan *computer vision*. Aplikasi memberikan rekomendasi terkait pertumbuhan fisik berdasarkan hasil analisis.
+
+2. **Analisis Gizi**  
+   Pilih makanan atau tambahkan menu baru. Aplikasi menghitung total nutrisi secara otomatis dan menyimpan riwayat konsumsi harian.
+
+3. **Health Risk Checker**  
+   Masukkan data kesehatan harian. Aplikasi menilai kondisi balita berdasarkan pedoman WHO IMCI dan memberikan kategori risiko serta rekomendasi tindakan.
+
+4. **Analisis Stunting**  
+   Masukkan data pertumbuhan bayi. Aplikasi menghitung z-score dan memberikan hasil apakah bayi normal, berisiko stunting, atau stunting, lengkap dengan rekomendasi.
 
 ## Teknologi yang Digunakan
 
-- **Kotlin**: Bahasa pemrograman utama
-- **Jetpack Compose**: UI modern dan deklaratif
-- **Navigation Compose**: Navigasi antar halaman
-- **ViewModel**: Manajemen state
-- **Coil**: Loading gambar
-- **Accompanist Permissions**: Handling permissions
+- **Jetpack Compose**: Membangun UI yang modern dan responsif.
+- **Arsitektur MVVM**: Memisahkan logika dan tampilan untuk pengembangan aplikasi yang lebih terstruktur.
+- **Navigation Compose**: Mengelola perpindahan antar-halaman.
+- **StateFlow & ViewModel**: Menyinkronkan data antar-halaman secara otomatis.
+- **Kotlin Coroutines**: Proses perhitungan dan evaluasi kesehatan secara asinkron.
+- **Vico Chart Library**: Menampilkan grafik perkembangan nutrisi harian.
+- **Firebase Firestore / Local Repository**: Menyimpan riwayat analisis pengguna.
+- **MediaPipe Pose / TensorFlow Lite**: Untuk mendeteksi posisi tubuh bayi dan mengukur ukuran tubuh menggunakan *computer vision*.
 
-## Struktur Navigasi
+## Cara Install
 
-```
-Upload (Route A) 
-    ↓
-Process (Route B) 
-    ↓
-Result (Route C) 
-    ↓
-    ├── History (Route D)
-    └── Recommendation (Route E)
-```
+1. Clone repository ini:
+   ```bash
+   git clone https://github.com/username/GrowTrack.git
+   ```
 
-## Permissions yang Diperlukan
+2. Buka proyek dengan Android Studio.
 
-- `CAMERA`: Untuk mengambil foto bayi
-- `READ_MEDIA_IMAGES`: Untuk membaca foto dari galeri (Android 13+)
-- `READ_EXTERNAL_STORAGE`: Untuk membaca foto dari galeri (Android 12 ke bawah)
-- `INTERNET`: Untuk loading gambar dengan Coil
+3. Jalankan aplikasi pada emulator atau perangkat Android Anda.
 
-## Cara Menjalankan
+## Kontribusi
 
-1. Buka project di Android Studio
-2. Sync Gradle dependencies
-3. Jalankan aplikasi di emulator atau device fisik
-4. Berikan permission untuk kamera dan galeri saat diminta
+Kami menyambut kontribusi dari komunitas. Jika Anda ingin berkontribusi, silakan lakukan hal berikut:
 
-## Catatan
+1. Fork repository ini.
+2. Buat branch baru untuk fitur/bugfix yang ingin Anda kerjakan.
+3. Kirimkan pull request dengan deskripsi perubahan yang Anda buat.
 
-- Saat ini analisis masih menggunakan data simulasi
-- Untuk implementasi real, perlu integrasi dengan ML model untuk analisis gambar
-- Hasil pengukuran disimpan dalam memory, belum persistent storage
+## Lisensi
+
+Aplikasi ini dilisensikan di bawah [MIT License](LICENSE).
