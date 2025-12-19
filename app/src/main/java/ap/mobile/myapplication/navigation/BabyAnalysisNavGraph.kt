@@ -2,20 +2,24 @@ package ap.mobile.myapplication.navigation
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ap.mobile.myapplication.ui.screens.*
-import ap.mobile.myapplication.viewmodel.BabyAnalysisViewModel
+import ap.mobile.myapplication.feature.growth.ui.*
+import ap.mobile.myapplication.feature.growth.viewmodel.*
+import ap.mobile.myapplication.core.util.FileUtils
+import ap.mobile.myapplication.feature.growth.viewmodel.BabyAnalysisViewModel
+import ap.mobile.myapplication.feature.growth.viewmodel.UiState
 
 @Composable
 fun BabyAnalysisNavGraph(
     navController: NavHostController,
     viewModel: BabyAnalysisViewModel
 ) {
+    val context = LocalContext.current
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
-    val isProcessing by viewModel.isProcessing.collectAsState()
-    val processingProgress by viewModel.processingProgress.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val processingStatus by viewModel.processingStatus.collectAsState()
     val currentMeasurement by viewModel.currentMeasurement.collectAsState()
     val measurementHistory by viewModel.measurementHistory.collectAsState()
@@ -34,8 +38,22 @@ fun BabyAnalysisNavGraph(
                     viewModel.setSelectedImage(uri)
                 },
                 onStartAnalysis = {
-                    viewModel.startAnalysis()
-                    navController.navigate(Screen.Process.route)
+                    selectedImageUri?.let { uri ->
+                        val file = FileUtils.getFileFromUri(context, uri)
+                        if (file != null && file.exists()) {
+                            viewModel.startAnalysis(file.absolutePath)
+                            navController.navigate(Screen.Process.route)
+                        } else {
+                            android.widget.Toast.makeText(
+                                context, 
+                                "Gagal memproses gambar. Silakan coba lagi.", 
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                },
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -43,7 +61,7 @@ fun BabyAnalysisNavGraph(
         // Route B: Process Analysis
         composable(Screen.Process.route) {
             ProcessAnalysisScreen(
-                progress = processingProgress,
+                uiState = uiState,
                 statusMessage = processingStatus,
                 onCancel = {
                     viewModel.cancelAnalysis()
@@ -51,10 +69,10 @@ fun BabyAnalysisNavGraph(
                 }
             )
             
-            // Automatically navigate to result when processing is complete
-            LaunchedEffect(isProcessing, processingProgress) {
-                if (!isProcessing && processingProgress >= 1f && currentMeasurement != null) {
-                    navController.navigate(Screen.Result.route) {
+            // Automatically navigate to result when processing is complete (Success state)
+            LaunchedEffect(uiState) {
+                if (uiState is UiState.Success) {
+                    navController.navigate(Screen.MeasurementResult.route) {
                         popUpTo(Screen.Upload.route)
                     }
                 }
@@ -62,7 +80,7 @@ fun BabyAnalysisNavGraph(
         }
         
         // Route C: Result Measurement
-        composable(Screen.Result.route) {
+        composable(Screen.MeasurementResult.route) {
             currentMeasurement?.let { measurement ->
                 ResultMeasurementScreen(
                     measurement = measurement,
@@ -70,7 +88,7 @@ fun BabyAnalysisNavGraph(
                         viewModel.saveToHistory()
                     },
                     onViewHistory = {
-                        navController.navigate(Screen.History.route)
+                        navController.navigate(Screen.HistoryMeasurement.route)
                     },
                     onViewRecommendation = {
                         navController.navigate(Screen.Recommendation.route)
@@ -86,7 +104,7 @@ fun BabyAnalysisNavGraph(
         }
         
         // Route D: History
-        composable(Screen.History.route) {
+        composable(Screen.HistoryMeasurement.route) {
             HistoryScreen(
                 historyList = measurementHistory,
                 growthTips = growthTips,
@@ -96,7 +114,7 @@ fun BabyAnalysisNavGraph(
                 onItemClick = { measurement ->
                     // Set current measurement and navigate to result
                     viewModel.setCurrentMeasurement(measurement)
-                    navController.navigate(Screen.Result.route)
+                    navController.navigate(Screen.MeasurementResult.route)
                 }
             )
         }
