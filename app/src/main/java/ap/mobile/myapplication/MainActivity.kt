@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    val context = androidx.compose.ui.platform.LocalContext.current
                     val viewModelFactory = ViewModelFactory.getInstance()
 
                     // ViewModels
@@ -117,11 +118,9 @@ class MainActivity : ComponentActivity() {
                                 onImageSelected = { uri -> babyAnalysisViewModel.setSelectedImage(uri) },
                                 onStartAnalysis = {
                                     selectedImageUri?.let { uri ->
-                                         val file = ap.mobile.myapplication.core.util.FileUtils.getFileFromUri(baseContext, uri)
-                                        if (file != null) {
-                                            babyAnalysisViewModel.startAnalysis(file.absolutePath)
-                                            navController.navigate(Screen.Process.route)
-                                        }
+                                        // Use the new background processing method to avoid ANR
+                                        babyAnalysisViewModel.processAndAnalyze(context, uri)
+                                        navController.navigate(Screen.Process.route)
                                     }
                                 },
                                 onBackClick = { navController.popBackStack() }

@@ -5,11 +5,10 @@ import ap.mobile.myapplication.feature.growth.data.model.MeasurementData
 import ap.mobile.myapplication.feature.growth.data.model.StatusPertumbuhan
 import ap.mobile.myapplication.core.data.api.NetworkResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -18,15 +17,11 @@ import java.util.Date
 import java.util.Locale
 
 class AnalysisRepository(
-    private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val auth: FirebaseAuth
 ) {
 
     // Simulate AI Analysis (since we don't have a real backend model)
-    // But we prepare the data as if it came from the server
-    // Simulate AI Analysis (since we don't have a real backend model yet)
-    // We check if the file exists to simulate "reading" it.
     suspend fun analyzeImage(imageFile: File): NetworkResult<MeasurementData> {
         return withContext(Dispatchers.IO) {
             try {
@@ -37,7 +32,6 @@ class AnalysisRepository(
                 delay(3000) // Simulate generic AI processing time
                 
                 // Logic MOCK: Generate result based on random + some valid ranges
-                // In a real app, we would upload this file to an endpoint (e.g., Cloud Functions or ML Kit)
                 val mockResult = generateMockMeasurement(imageFile)
                 NetworkResult.Success(mockResult)
             } catch (e: Exception) {
@@ -61,17 +55,14 @@ class AnalysisRepository(
                 }
 
                 // 2. Prepare Data
-                // We use a new ID for the document, or use the one in measurement if valid
-                val docRef = firestore.collection("users").document(userId)
-                    .collection("growth_history").document()
-                
                 val finalMeasurement = measurement.copy(
                     id = System.currentTimeMillis(), // Ensure ID is fresh
                     imageUri = finalImageUrl
                 )
 
-                // 3. Save to Firestore
-                docRef.set(finalMeasurement).await()
+                // 3. Save to Realtime Database via Retrofit
+                // Note: The response is a Map containing the generated key, e.g., {"name": "-Nv..."}
+                ap.mobile.myapplication.core.data.api.RetrofitClient.instance.saveGrowthMeasurement(userId, finalMeasurement)
                 
                 NetworkResult.Success(true)
             } catch (e: Exception) {
@@ -81,23 +72,26 @@ class AnalysisRepository(
         }
     }
 
-    suspend fun getHistory(): NetworkResult<List<MeasurementData>> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = auth.currentUser?.uid ?: return@withContext NetworkResult.Error("User tidak login")
-                
-                val snapshot = firestore.collection("users").document(userId)
-                    .collection("growth_history")
-                    .orderBy("id", Query.Direction.DESCENDING)
-                    .get()
-                    .await()
-                
-                val list = snapshot.documents.mapNotNull { it.toObject(MeasurementData::class.java) }
-                NetworkResult.Success(list)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                NetworkResult.Error("Gagal memuat riwayat: ${e.message}")
+    fun getHistoryFlow(): Flow<NetworkResult<List<MeasurementData>>> = kotlinx.coroutines.flow.flow {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            emit(NetworkResult.Error("User tidak login"))
+            return@flow
+        }
+
+        try {
+            // Fetch from Realtime Database via Retrofit
+            val responseMap = ap.mobile.myapplication.core.data.api.RetrofitClient.instance.getGrowthHistory(userId)
+            
+            val list = if (responseMap != null) {
+                responseMap.values.toList().sortedByDescending { it.id }
+            } else {
+                emptyList()
             }
+            
+            emit(NetworkResult.Success(list))
+        } catch (e: Exception) {
+            emit(NetworkResult.Error("Gagal memuat riwayat: ${e.message}"))
         }
     }
     

@@ -101,6 +101,18 @@ interface FirebaseApiService {
     @Multipart
     @POST("analyze")
     suspend fun analyzeImage(@Part image: MultipartBody.Part): Response<MeasurementData>
+
+    // Growth (Analysis) History - User Specific
+    @POST("users/{userId}/growth_history.json")
+    suspend fun saveGrowthMeasurement(
+        @Path("userId") userId: String,
+        @Body measurement: MeasurementData
+    ): Map<String, String>
+
+    @GET("users/{userId}/growth_history.json")
+    suspend fun getGrowthHistory(
+        @Path("userId") userId: String
+    ): Map<String, MeasurementData>?
 }
 
 /**

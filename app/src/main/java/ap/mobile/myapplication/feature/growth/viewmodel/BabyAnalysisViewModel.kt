@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 sealed class UiState<out T> {
@@ -53,11 +54,13 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
 
     fun fetchHistory() {
         viewModelScope.launch {
-            val result = repository.getHistory()
-            if (result is NetworkResult.Success) {
-                result.data?.let {
-                    _measurementHistory.value = it
+            repository.getHistoryFlow().collect { result ->
+                if (result is NetworkResult.Success) {
+                    result.data?.let {
+                        _measurementHistory.value = it
+                    }
                 }
+                // Handle error if needed
             }
         }
     }
@@ -77,23 +80,54 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
             _uiState.value = UiState.Loading
             _processingStatus.value = "Menganalisis gambar..."
             
-            val file = File(imagePath)
-            when (val result = repository.analyzeImage(file)) {
-                is NetworkResult.Success -> {
-                    result.data?.let { data ->
-                        _currentMeasurement.value = data
-                        generateRecommendation(data.statusPertumbuhan)
-                        _uiState.value = UiState.Success(data)
-                        _processingStatus.value = "Selesai"
+            // Switch to IO for file operations
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val file = File(imagePath)
+                if (!file.exists()) {
+                     withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        _uiState.value = UiState.Error("File gambar tidak ditemukan/gagal dibaca")
+                    }
+                    return@withContext
+                }
+
+                when (val result = repository.analyzeImage(file)) {
+                    is NetworkResult.Success -> {
+                        withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            result.data?.let { data ->
+                                _currentMeasurement.value = data
+                                generateRecommendation(data.statusPertumbuhan)
+                                _uiState.value = UiState.Success(data)
+                                _processingStatus.value = "Selesai"
+                            }
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            _uiState.value = UiState.Error(result.message ?: "Terjadi kesalahan")
+                            _processingStatus.value = "Gagal"
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        withContext(kotlinx.coroutines.Dispatchers.Main) {
+                             _uiState.value = UiState.Loading
+                        }
                     }
                 }
-                is NetworkResult.Error -> {
-                    _uiState.value = UiState.Error(result.message ?: "Terjadi kesalahan")
-                    _processingStatus.value = "Gagal"
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.value = UiState.Loading
-                }
+            }
+        }
+    }
+
+    // Helper to process URI in background to prevent ANR
+    fun processAndAnalyze(context: android.content.Context, uri: Uri) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            _uiState.value = UiState.Loading // Update state immediately (thread-safe)
+            _processingStatus.value = "Memproses gambar..."
+            
+            val file = ap.mobile.myapplication.core.util.FileUtils.getFileFromUri(context, uri)
+            if (file != null) {
+                startAnalysis(file.absolutePath)
+            } else {
+                _uiState.value = UiState.Error("Gagal memproses gambar")
             }
         }
     }
@@ -127,7 +161,7 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
             _processingStatus.value = "Menyimpan..."
             val result = repository.saveMeasurement(measurement, imageUri)
             if (result is NetworkResult.Success) {
-                fetchHistory() // Refresh list
+                fetchHistory()
                 _processingStatus.value = "Tersimpan"
             } else {
                 _processingStatus.value = "Gagal simpan"
