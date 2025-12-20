@@ -33,7 +33,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 fun AnalisisKaloriScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: AnalisisKaloriViewModel = viewModel()
+    viewModel: AnalisisKaloriViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -85,7 +85,7 @@ fun AnalisisKaloriScreen(
                 onClick = {
                     viewModel.saveDailyHistory()
                     navController.navigate(Screen.GrafikAnalisis.route) {
-                        popUpTo(Screen.AnalisisKalori.route) {
+                        popUpTo(Screen.GrafikAnalisis.route) {
                             inclusive = true
                         }
                     }
@@ -214,11 +214,14 @@ fun RekomendasiMenuItem(
 }
 
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun AnalisisKaloriScreenPreview() {
     MyApplicationTheme {
         val navController = rememberNavController()
-        AnalisisKaloriScreen(navController = navController)
+        val vm: AnalisisKaloriViewModel = viewModel()
+        AnalisisKaloriScreen(navController = navController, viewModel = vm)
     }
 }

@@ -110,6 +110,7 @@ class AnalisisKaloriViewModel : ViewModel() {
                     totalKalori = totalKkal
                 )
                 repository.addDailyHistory(dailyHistory)
+                _selectedItems.value = emptyList()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
