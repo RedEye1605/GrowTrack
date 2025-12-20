@@ -94,21 +94,25 @@ class AnalisisKaloriViewModel : ViewModel() {
 
     fun saveDailyHistory() {
         viewModelScope.launch {
-            val items = _selectedItems.value
-            if (items.isEmpty()) return@launch // Don't save if nothing is selected
+            try {
+                val items = _selectedItems.value
+                if (items.isEmpty()) return@launch // Don't save if nothing is selected
 
-            val totalKkal = items.sumOf { it.kkal }
-            val menuNames = items.map { it.name }
+                val totalKkal = items.sumOf { it.kkal }
+                val menuNames = items.map { it.name }
 
-            val sdf = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
-            val currentDate = sdf.format(Date())
+                val sdf = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
+                val currentDate = sdf.format(Date())
 
-            val dailyHistory = DailyHistory(
-                date = currentDate,
-                menus = menuNames,
-                totalKalori = totalKkal
-            )
-            repository.addDailyHistory(dailyHistory)
+                val dailyHistory = DailyHistory(
+                    date = currentDate,
+                    menus = menuNames,
+                    totalKalori = totalKkal
+                )
+                repository.addDailyHistory(dailyHistory)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

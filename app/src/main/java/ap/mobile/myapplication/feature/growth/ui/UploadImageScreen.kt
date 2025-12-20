@@ -68,21 +68,27 @@ fun UploadImageScreen(
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
     
     // Create a file for the camera image
-    fun createTempPictureUri(): Uri {
-        val tempFile = File.createTempFile(
-            "camera_image_",
-            ".jpg",
-            context.cacheDir
-        ).apply {
-            createNewFile()
-            deleteOnExit()
+    // Create a file for the camera image safely
+    fun createTempPictureUri(): Uri? {
+        return try {
+            val tempFile = File.createTempFile(
+                "camera_image_",
+                ".jpg",
+                context.cacheDir
+            ).apply {
+                createNewFile()
+                deleteOnExit()
+            }
+            
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                tempFile
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-        
-        return FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.provider",
-            tempFile
-        )
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -264,8 +270,14 @@ fun UploadImageScreen(
                         icon = Icons.Default.CameraAlt,
                         onClick = {
                             if (cameraPermissionState.status.isGranted) {
-                                tempCameraUri = createTempPictureUri()
-                                cameraLauncher.launch(tempCameraUri!!)
+                                val uri = createTempPictureUri()
+                                if (uri != null) {
+                                    tempCameraUri = uri
+                                    cameraLauncher.launch(uri)
+                                } else {
+                                    // Handle error safely
+                                    android.widget.Toast.makeText(context, "Gagal membuar file gambar", android.widget.Toast.LENGTH_SHORT).show()
+                                }
                             } else {
                                 cameraPermissionState.launchPermissionRequest()
                             }

@@ -95,8 +95,10 @@ fun BabyAnalysisNavGraph(
                     },
                     onBackToHome = {
                         viewModel.clearCurrentMeasurement()
-                        navController.navigate(Screen.Upload.route) {
-                            popUpTo(Screen.Upload.route) { inclusive = true }
+                        // Ensure we navigate back to the Main Home Screen (outside this nested graph if necessary, or just pop inclusive)
+                        // Assuming Screen.Home.route is the main entry point defined in MainActivity
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
                         }
                     }
                 )
@@ -136,8 +138,8 @@ fun BabyAnalysisNavGraph(
                     },
                     onBackToHome = {
                         viewModel.clearCurrentMeasurement()
-                        navController.navigate(Screen.Upload.route) {
-                            popUpTo(Screen.Upload.route) { inclusive = true }
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
                         }
                     }
                 )

@@ -75,11 +75,13 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.play.services.auth)
     implementation(libs.kotlinx.coroutines.play.services)
+
     
     // Vico Charts
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
     implementation(libs.vico.core)
+    implementation(libs.google.generativeai)
 
 
     testImplementation(libs.junit)

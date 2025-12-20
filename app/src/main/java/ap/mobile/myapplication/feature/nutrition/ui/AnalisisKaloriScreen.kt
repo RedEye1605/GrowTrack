@@ -85,7 +85,7 @@ fun AnalisisKaloriScreen(
                 onClick = {
                     viewModel.saveDailyHistory()
                     navController.navigate(Screen.GrafikAnalisis.route) {
-                        popUpTo(Screen.GrafikAnalisis.route) {
+                        popUpTo(Screen.AnalisisKalori.route) {
                             inclusive = true
                         }
                     }

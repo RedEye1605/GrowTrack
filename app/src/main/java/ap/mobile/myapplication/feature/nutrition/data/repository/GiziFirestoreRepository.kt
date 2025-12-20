@@ -3,12 +3,15 @@ package ap.mobile.myapplication.feature.nutrition.data.repository
 import ap.mobile.myapplication.feature.nutrition.data.model.DailyHistory
 import ap.mobile.myapplication.feature.nutrition.data.model.FoodItem
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+// ... imports
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 // Firestore Repository
 class GiziFirestoreRepository {
@@ -58,9 +61,12 @@ class GiziFirestoreRepository {
 
                 val history = snapshot?.documents?.mapNotNull { doc ->
                     try {
+                        val menusRaw = doc.get("menus") as? List<*>
+                        val menusList = menusRaw?.mapNotNull { it as? String } ?: emptyList()
+
                         DailyHistory(
                             date = doc.getString("date") ?: "",
-                            menus = doc.get("menus") as? List<String> ?: emptyList(),
+                            menus = menusList,
                             totalKalori = doc.getLong("totalKalori")?.toInt() ?: 0
                         )
                     } catch (e: Exception) {
@@ -75,8 +81,8 @@ class GiziFirestoreRepository {
     }
 
     // Add Food Item
-    suspend fun addFoodItem(foodItem: FoodItem): Result<Unit> {
-        return try {
+    suspend fun addFoodItem(foodItem: FoodItem): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
             val data = hashMapOf(
                 "name" to foodItem.name,
                 "kkal" to foodItem.kkal,
@@ -92,8 +98,8 @@ class GiziFirestoreRepository {
     }
 
     // Delete Food Item
-    suspend fun deleteFoodItem(foodItem: FoodItem): Result<Unit> {
-        return try {
+    suspend fun deleteFoodItem(foodItem: FoodItem): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
             // Find document by matching fields
             val querySnapshot = foodItemsCollection
                 .whereEqualTo("name", foodItem.name)
@@ -109,8 +115,8 @@ class GiziFirestoreRepository {
     }
 
     // Add Daily History
-    suspend fun addDailyHistory(dailyHistory: DailyHistory): Result<Unit> {
-        return try {
+    suspend fun addDailyHistory(dailyHistory: DailyHistory): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
             val data = hashMapOf(
                 "date" to dailyHistory.date,
                 "menus" to dailyHistory.menus,
@@ -125,7 +131,7 @@ class GiziFirestoreRepository {
     }
 
     // Initialize with default data (call once on first app launch)
-    suspend fun initializeDefaultData() {
+    suspend fun initializeDefaultData() = withContext(Dispatchers.IO) {
         try {
             val snapshot = foodItemsCollection.limit(1).get().await()
             if (snapshot.isEmpty) {

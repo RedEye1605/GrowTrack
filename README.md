@@ -45,7 +45,7 @@ GrowTrack adalah aplikasi Android yang dirancang untuk membantu orang tua dalam 
 
 1. Clone repository ini:
    ```bash
-   git clone https://github.com/username/GrowTrack.git
+   git clone https://github.com/RedEye1605/GrowTrack
    ```
 
 2. Buka proyek dengan Android Studio.
