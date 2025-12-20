@@ -150,6 +150,20 @@ class MainActivity : ComponentActivity() {
 
                         composable(Screen.MeasurementResult.route) {
                             val currentMeasurement by babyAnalysisViewModel.currentMeasurement.collectAsState()
+                            val processingStatus by babyAnalysisViewModel.processingStatus.collectAsState()
+                            val context = androidx.compose.ui.platform.LocalContext.current
+
+                            LaunchedEffect(processingStatus) {
+                                if (processingStatus == "Tersimpan") {
+                                    android.widget.Toast.makeText(context, "Data berhasil disimpan!", android.widget.Toast.LENGTH_SHORT).show()
+                                    babyAnalysisViewModel.resetStatus()
+                                } else if (processingStatus.startsWith("Gagal")) {
+                                    android.widget.Toast.makeText(context, processingStatus, android.widget.Toast.LENGTH_LONG).show()
+                                    // Don't reset immediately so user can read it? Or reset after delay?
+                                    // For now, let it persist in status but Toast only triggers once due to LaunchedEffect key
+                                }
+                            }
+
                              currentMeasurement?.let { measurement ->
                                 ResultMeasurementScreen(
                                     measurement = measurement,
@@ -264,16 +278,36 @@ class MainActivity : ComponentActivity() {
                         }
                         
                         // --- Nutrition (Gizi) ---
+                        // Create a shared ViewModel for nutrition screens
                         composable(Screen.Nutrition.route) {
-                             // Redirect or show Nutrition Home
-                             // Assuming AnalisisKaloriScreen is the start
-                             ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen(navController = navController)
+                             // Get ViewModel scoped to the navigation graph
+                             val parentEntry = remember(it) {
+                                 navController.getBackStackEntry(Screen.Nutrition.route)
+                             }
+                             val sharedAnalisisViewModel: ap.mobile.myapplication.feature.nutrition.viewmodel.AnalisisKaloriViewModel = viewModel(parentEntry)
+                             ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen(
+                                 navController = navController,
+                                 viewModel = sharedAnalisisViewModel
+                             )
                         }
                          composable(Screen.AnalisisKalori.route) {
                              ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen(navController = navController)
                         }
                         // Add other nutrition screens as needed: PilihMenu, TambahMenu, GrafikAnalisis
-                        
+                        composable(Screen.GrafikAnalisis.route) {
+                            ap.mobile.myapplication.feature.nutrition.ui.GrafikAnalisisScreen(navController = navController)
+                        }
+                        composable(Screen.PilihMenu.route) {
+                            // Create shared ViewModel scoped to parent entry if available
+                            val sharedAnalisisViewModel: ap.mobile.myapplication.feature.nutrition.viewmodel.AnalisisKaloriViewModel = viewModel()
+                            ap.mobile.myapplication.feature.nutrition.ui.PilihMenuScreen(
+                                navController = navController,
+                                sharedViewModel = sharedAnalisisViewModel
+                            )
+                        }
+                        composable(Screen.TambahMenu.route) {
+                            ap.mobile.myapplication.feature.nutrition.ui.TambahMenuScreen(navController = navController)
+                        }
                     }
                 }
             }

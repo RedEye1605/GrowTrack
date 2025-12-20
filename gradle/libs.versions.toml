@@ -22,6 +22,8 @@ gson = "2.10.1"
 lifecycleRuntimeCompose = "2.9.4"
 playServicesAuth = "21.3.0"
 googleServices = "4.4.2"
+firebaseVertexai = "16.5.0"
+generativeai = "0.9.0"
 
 
 [libraries]
@@ -53,7 +55,7 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 # Firebase
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.7.0" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "34.3.0" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
@@ -65,6 +67,8 @@ vico-core = { group = "com.patrykandpatrick.vico", name = "core", version = "1.1
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
 # Compose Runtime Livedata
 compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai", version.ref = "firebaseVertexai" }
+google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 
 
 [plugins]

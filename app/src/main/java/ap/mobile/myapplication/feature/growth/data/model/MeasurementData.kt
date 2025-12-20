@@ -7,7 +7,8 @@ data class MeasurementData(
     val lingkarKepala: Float = 0f, // cm
     val beratBadan: Float = 0f, // kg
     val statusPertumbuhan: StatusPertumbuhan = StatusPertumbuhan.NORMAL,
-    val imageUri: String? = null
+    val imageUri: String? = null,
+    val recommendation: Recommendation? = null
 )
 
 enum class StatusPertumbuhan {

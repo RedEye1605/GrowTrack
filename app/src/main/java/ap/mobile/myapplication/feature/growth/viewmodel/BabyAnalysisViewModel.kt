@@ -95,7 +95,7 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
                         withContext(kotlinx.coroutines.Dispatchers.Main) {
                             result.data?.let { data ->
                                 _currentMeasurement.value = data
-                                generateRecommendation(data.statusPertumbuhan)
+                                _currentRecommendation.value = data.recommendation ?: getFallbackRecommendation(data.statusPertumbuhan)
                                 _uiState.value = UiState.Success(data)
                                 _processingStatus.value = "Selesai"
                             }
@@ -132,8 +132,8 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
         }
     }
     
-    private fun generateRecommendation(status: StatusPertumbuhan) {
-        val recommendation = when (status) {
+    private fun getFallbackRecommendation(status: StatusPertumbuhan): Recommendation {
+        return when (status) {
             StatusPertumbuhan.NORMAL -> Recommendation(
                 medis = "Lanjutkan pemeriksaan rutin setiap bulan untuk memantau pertumbuhan bayi.",
                 gizi = "Berikan ASI eksklusif atau makanan pendamping ASI sesuai usia. Pastikan asupan gizi seimbang dengan protein, karbohidrat, dan lemak sehat.",
@@ -150,7 +150,6 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
                 aktivitas = "Lakukan terapi stimulasi tumbuh kembang. Konsultasikan dengan fisioterapis anak jika diperlukan."
             )
         }
-        _currentRecommendation.value = recommendation
     }
     
     fun saveToHistory() {
@@ -163,15 +162,17 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
             if (result is NetworkResult.Success) {
                 fetchHistory()
                 _processingStatus.value = "Tersimpan"
+            } else if (result is NetworkResult.Error) {
+                _processingStatus.value = "Gagal: ${result.message}"
             } else {
-                _processingStatus.value = "Gagal simpan"
+                _processingStatus.value = "Gagal simpan (Unknown)"
             }
         }
     }
     
     fun setCurrentMeasurement(measurement: MeasurementData) {
         _currentMeasurement.value = measurement
-        generateRecommendation(measurement.statusPertumbuhan)
+        _currentRecommendation.value = measurement.recommendation ?: getFallbackRecommendation(measurement.statusPertumbuhan)
         measurement.imageUri?.let {
             _selectedImageUri.value = Uri.parse(it)
         }
@@ -188,6 +189,10 @@ class BabyAnalysisViewModel(private val repository: AnalysisRepository) : ViewMo
     fun cancelAnalysis() {
         _uiState.value = UiState.Idle
         _processingStatus.value = "Dibatalkan"
+    }
+
+    fun resetStatus() {
+        _processingStatus.value = "Menunggu..."
     }
 }
 

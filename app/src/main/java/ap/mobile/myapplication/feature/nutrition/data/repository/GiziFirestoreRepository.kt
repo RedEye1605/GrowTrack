@@ -3,8 +3,8 @@ package ap.mobile.myapplication.feature.nutrition.data.repository
 import ap.mobile.myapplication.feature.nutrition.data.model.DailyHistory
 import ap.mobile.myapplication.feature.nutrition.data.model.FoodItem
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

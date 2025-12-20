@@ -65,13 +65,13 @@ interface FirebaseApiService {
 
     // History Records
     @GET("history.json")
-    suspend fun getHistory(): Map<String, HistoryRecord>?
+    suspend fun getHistory(@Query("auth") auth: String): Map<String, HistoryRecord>?
 
     @POST("history.json")
-    suspend fun postHistory(@Body body: HistoryRecord): Map<String, String>
+    suspend fun postHistory(@Body body: HistoryRecord, @Query("auth") auth: String): Map<String, String>
 
     @PUT("history/{id}.json")
-    suspend fun putHistory(@Path("id") id: String, @Body body: HistoryRecord): HistoryRecord
+    suspend fun putHistory(@Path("id") id: String, @Body body: HistoryRecord, @Query("auth") auth: String): HistoryRecord
 
     @DELETE("history/{id}.json")
     suspend fun deleteHistory(@Path("id") id: String)
@@ -85,13 +85,14 @@ interface FirebaseApiService {
 
     // Health Assessments
     @POST("health_assessments.json")
-    suspend fun saveHealthCheck(@Body summary: HealthCheckSummary): Map<String, String>
+    suspend fun saveHealthCheck(@Body summary: HealthCheckSummary, @Query("auth") auth: String): Map<String, String>
 
     @GET("health_assessments.json")
     suspend fun getHealthHistory(
         @Query("orderBy") orderBy: String = "\"\$key\"",
         @Query("limitToLast") limit: Int,
-        @Query("endAt") endAt: String? = null
+        @Query("endAt") endAt: String? = null,
+        @Query("auth") auth: String
     ): Map<String, HealthCheckSummary>
 
     @DELETE("health_assessments/{id}.json")
@@ -106,12 +107,14 @@ interface FirebaseApiService {
     @POST("users/{userId}/growth_history.json")
     suspend fun saveGrowthMeasurement(
         @Path("userId") userId: String,
-        @Body measurement: MeasurementData
+        @Body measurement: MeasurementData,
+        @Query("auth") auth: String
     ): Map<String, String>
 
     @GET("users/{userId}/growth_history.json")
     suspend fun getGrowthHistory(
-        @Path("userId") userId: String
+        @Path("userId") userId: String,
+        @Query("auth") auth: String
     ): Map<String, MeasurementData>?
 }
 
