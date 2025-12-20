@@ -47,6 +47,16 @@ import ap.mobile.myapplication.feature.healthcheck.ui.InputScreen
 import ap.mobile.myapplication.feature.healthcheck.ui.ResultScreen
 // import ap.mobile.myapplication.feature.healthcheck.viewmodel.HealthCheckViewModel
 
+// Import ViewModel
+import ap.mobile.myapplication.feature.nutrition.viewmodel.AnalisisKaloriViewModel
+import ap.mobile.myapplication.feature.nutrition.viewmodel.PilihMenuViewModel
+
+// Import UI Screens
+import ap.mobile.myapplication.feature.nutrition.ui.GrafikAnalisisScreen
+import ap.mobile.myapplication.feature.nutrition.ui.PilihMenuScreen
+import ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen
+import ap.mobile.myapplication.feature.nutrition.ui.TambahMenuScreen
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,7 +193,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.HistoryMeasurement.route) {
                              val historyList by babyAnalysisViewModel.measurementHistory.collectAsState()
                              val growthTips by babyAnalysisViewModel.growthTips.collectAsState()
-                             
+
                              ap.mobile.myapplication.feature.growth.ui.HistoryScreen(
                                  historyList = historyList,
                                  growthTips = growthTips,
@@ -280,29 +290,35 @@ class MainActivity : ComponentActivity() {
                         // --- Nutrition (Gizi) ---
                         // Create a shared ViewModel for nutrition screens
                         composable(Screen.Nutrition.route) {
-                             // Get ViewModel scoped to the navigation graph
-                             val parentEntry = remember(it) {
-                                 navController.getBackStackEntry(Screen.Nutrition.route)
-                             }
-                             val sharedAnalisisViewModel: ap.mobile.myapplication.feature.nutrition.viewmodel.AnalisisKaloriViewModel = viewModel(parentEntry)
-                             ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen(
-                                 navController = navController,
-                                 viewModel = sharedAnalisisViewModel
-                             )
+                            GrafikAnalisisScreen(navController = navController)
                         }
-                         composable(Screen.AnalisisKalori.route) {
-                             ap.mobile.myapplication.feature.nutrition.ui.AnalisisKaloriScreen(navController = navController)
+
+                        composable(Screen.AnalisisKalori.route) {
+                            val parentEntry = remember(it) {
+                                navController.getBackStackEntry(Screen.Nutrition.route)
+                            }
+                            val sharedViewModel: AnalisisKaloriViewModel = viewModel(parentEntry)
+
+                            AnalisisKaloriScreen(
+                                navController = navController,
+                                viewModel = sharedViewModel
+                            )
                         }
                         // Add other nutrition screens as needed: PilihMenu, TambahMenu, GrafikAnalisis
                         composable(Screen.GrafikAnalisis.route) {
-                            ap.mobile.myapplication.feature.nutrition.ui.GrafikAnalisisScreen(navController = navController)
+                            GrafikAnalisisScreen(navController = navController)
                         }
+
                         composable(Screen.PilihMenu.route) {
-                            // Create shared ViewModel scoped to parent entry if available
-                            val sharedAnalisisViewModel: ap.mobile.myapplication.feature.nutrition.viewmodel.AnalisisKaloriViewModel = viewModel()
-                            ap.mobile.myapplication.feature.nutrition.ui.PilihMenuScreen(
+                            // Ambil entry dari Nutrition sebagai owner ViewModel
+                            val parentEntry = remember(it) {
+                                navController.getBackStackEntry(Screen.Nutrition.route)
+                            }
+                            val sharedViewModel: AnalisisKaloriViewModel = viewModel(parentEntry)
+
+                            PilihMenuScreen(
                                 navController = navController,
-                                sharedViewModel = sharedAnalisisViewModel
+                                sharedViewModel = sharedViewModel
                             )
                         }
                         composable(Screen.TambahMenu.route) {

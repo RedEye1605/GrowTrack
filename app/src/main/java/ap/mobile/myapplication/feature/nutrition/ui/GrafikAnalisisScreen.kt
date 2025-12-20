@@ -28,6 +28,9 @@ import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import ap.mobile.myapplication.feature.nutrition.data.model.DailyHistory
 import ap.mobile.myapplication.core.ui.theme.MyApplicationTheme
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
+import com.patrykandpatrick.vico.core.scroll.AutoScrollCondition
+import com.patrykandpatrick.vico.core.scroll.InitialScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +56,9 @@ fun GrafikAnalisisScreen(
 
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    } }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 }
@@ -137,8 +142,14 @@ fun GrafikSection(modelProducer: ChartEntryModelProducer) {
             chartModelProducer = modelProducer,
             startAxis = rememberStartAxis(),
             bottomAxis = rememberBottomAxis(),
-            modifier = Modifier.height(200.dp)
+            modifier = Modifier.height(200.dp),
+            chartScrollSpec = rememberChartScrollSpec(
+                isScrollEnabled = true,
+                initialScroll = InitialScroll.End, // masuk screen langsung di kanan
+                autoScrollCondition = AutoScrollCondition.OnModelSizeIncreased // auto-scroll hanya saat data bertambah
+            )
         )
+
     }
 }
 

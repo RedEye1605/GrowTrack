@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -35,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import ap.mobile.myapplication.feature.nutrition.data.model.FoodItem
 import ap.mobile.myapplication.core.ui.theme.MyApplicationTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,12 +81,14 @@ fun PilihMenuScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.weight(1f) // <-- This is the fix
+
             ) {
                 items(foodItems, key = { it.id }) { item ->
                     FoodItemRow(
                         item = item,
                         isSelected = selectedItems.any { it.id == item.id },
-                        onItemSelected = { sharedViewModel.toggleFoodSelection(item) }
+                        onItemSelected = { sharedViewModel.toggleFoodSelection(item) },
+                        onDelete = { pilihMenuViewModel.deleteFoodItem(item) } // Hubungkan ke ViewModel
                     )
                 }
             }
@@ -140,6 +144,7 @@ fun FoodItemRow(
     item: FoodItem,
     isSelected: Boolean,
     onItemSelected: () -> Unit,
+    onDelete: () -> Unit // Tambahkan parameter ini
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -158,12 +163,34 @@ fun FoodItemRow(
             Text(text = item.name, fontWeight = FontWeight.SemiBold)
             Text(text = "${item.kkal} kkal", fontSize = 12.sp, color = Color.Gray)
         }
-        Spacer(modifier = Modifier.width(16.dp))
+
+        // Tombol Hapus (Tong Sampah)
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.Red
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Tombol Tambah/Check
         IconButton(onClick = onItemSelected, modifier = Modifier.size(32.dp)) {
             if (isSelected) {
-                Icon(Icons.Default.Check, contentDescription = "Selected", tint = Color.White, modifier = Modifier.background(MaterialTheme.colorScheme.primary, CircleShape).padding(4.dp))
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = "Selected",
+                    tint = Color.White,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.primary, CircleShape).padding(4.dp)
+                )
             } else {
-                Icon(Icons.Default.Add, contentDescription = "Select", tint = Color.Gray, modifier = Modifier.background(Color.LightGray, CircleShape).padding(4.dp))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Select",
+                    tint = Color.Gray,
+                    modifier = Modifier.background(Color.LightGray, CircleShape).padding(4.dp)
+                )
             }
         }
     }
