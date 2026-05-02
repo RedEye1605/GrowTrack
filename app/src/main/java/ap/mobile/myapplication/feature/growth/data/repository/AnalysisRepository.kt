@@ -35,7 +35,7 @@ class AnalysisRepository(
             // Using the user-suggested preview model.
             modelName = "gemini-3-flash-preview",
             // PENTING: Ganti dengan API Key Anda sendiri!
-            apiKey = "AIzaSyBA0ybOu28e4DpGgiJ3nCDb3JMgsUR26tU"
+            apiKey = "Aazascafasndsandwyfvvahbcjankca"
         )
     }
 
